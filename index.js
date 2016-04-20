@@ -1533,16 +1533,22 @@ Jimp.prototype.resize = function (w, h, mode, cb) {
  * Scale the image so that it fills the given width and height. Some parts of the image may be clipped.
  * @param w the width to resize the image to
  * @param h the height to resize the image to
- * @param (optional) cb a callback for when complete
+ * @param mode (optional) mode a scaling method (e.g. Jimp.RESIZE_BEZIER)
+ * @param cb (optional) cb a callback for when complete
  * @returns this for chaining of methods
  */
-Jimp.prototype.cover = function (w, h, cb) {
+Jimp.prototype.cover = function (w, h, mode, cb) {
     if ("number" != typeof w || "number" != typeof h)
         return throwError.call(this, "w and h must be numbers", cb);
 
+    if ("function" == typeof mode && "undefined" == typeof cb) {
+        cb = mode;
+        mode = null;
+    }
+
     var f = (w/h > this.bitmap.width/this.bitmap.height) ?
         w/this.bitmap.width : h/this.bitmap.height;
-    this.scale(f);
+    this.scale(f, mode);
     this.crop(this.bitmap.width / 2 - w / 2, this.bitmap.height / 2 - h / 2, w, h);
     
     if (isNodePattern(cb)) return cb.call(this, null, this);
@@ -1553,18 +1559,25 @@ Jimp.prototype.cover = function (w, h, cb) {
  * Scale the image to the largest size so that its width and height fits inside the given width and height.
  * @param w the width to resize the image to
  * @param h the height to resize the image to
- * @param (optional) cb a callback for when complete
+ * @param mode (optional) mode a scaling method (e.g. Jimp.RESIZE_BEZIER)
+ * @param cb (optional) cb a callback for when complete
  * @returns this for chaining of methods
  */
-Jimp.prototype.contain = function (w, h, cb) {
+Jimp.prototype.contain = function (w, h, mode, cb) {
     if ("number" != typeof w || "number" != typeof h)
         return throwError.call(this, "w and h must be numbers", cb);
 
+    if ("function" == typeof mode && "undefined" == typeof cb) {
+        cb = mode;
+        mode = null;
+    }
+
     var f = (w/h > this.bitmap.width/this.bitmap.height) ?
         h/this.bitmap.height : w/this.bitmap.width;
-    var c = this.clone().scale(f);
-    
-    this.resize(w, h);
+    var c = this.clone().scale(f, mode);
+
+    this.resize(w, h, mode);
+
     this.scan(0, 0, this.bitmap.width, this.bitmap.height, function (x, y, idx) {
         this.bitmap.data.writeUInt32BE(this._background, idx);
     });
@@ -1577,18 +1590,25 @@ Jimp.prototype.contain = function (w, h, cb) {
 /**
  * Uniformly scales the image by a factor.
  * @param f the factor to scale the image by
- * @param (optional) cb a callback for when complete
+ * @param mode (optional) mode a scaling method (e.g. Jimp.RESIZE_BEZIER)
+ * @param cb (optional) cb a callback for when complete
  * @returns this for chaining of methods
  */
-Jimp.prototype.scale = function (f, cb) {
+Jimp.prototype.scale = function (f, mode, cb) {
     if ("number" != typeof f)
         return throwError.call(this, "f must be a number", cb);
     if (f < 0)
         return throwError.call(this, "f must be a positive number", cb);
 
+    if ("function" == typeof mode && "undefined" == typeof cb) {
+        cb = mode;
+        mode = null;
+    }
+
     var w = this.bitmap.width * f;
     var h = this.bitmap.height * f;
-    this.resize(w, h);
+
+    this.resize(w, h, mode);
 
     if (isNodePattern(cb)) return cb.call(this, null, this);
     else return this;
