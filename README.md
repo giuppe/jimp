@@ -78,7 +78,7 @@ image.greyscale();             // remove colour from the image
 image.sepia();                 // apply a sepia wash to the image
 image.opacity( f );            // multiply the alpha channel by each pixel by the factor f, 0 - 1
 image.resize( w, h[, mode] );  // resize the image. Jimp.AUTO can be passed as one of the values. Optionally, a resize mode can be passed.
-image.scale( f );              // scale the image by the factor f
+image.scale( f[, mode] );      // scale the image by the factor f
 image.rotate( deg[, resize] ); // rotate the image clockwise by a number of degrees. Unless `false` is passed as the second parameter, the image width and height will be resized appropriately.
 image.blit( src, x, y[, srcx, srcy, srcw, srch] );
                                // blit the image with another Jimp image at x, y, optionally cropped.
@@ -88,8 +88,8 @@ image.contrast( val );         // adjust the contrast by a value -1 to +1
 image.posterize( n );          // apply a posterization effect with n level
 image.mask( src, x, y );       // masks the image with another Jimp image at x, y using average pixel value
 image.dither565();             // ordered dithering of the image and reduce color space to 16-bits (RGB565)
-image.cover( w, h );           // scale the image so that it fills the given width and height
-image.contain( w, h );         // scale the image to the largest size so that fits inside the given width and height
+image.cover( w, h[, mode] );   // scale the image so that it fills the given width and height
+image.contain( w, h[, mode] ); // scale the image to the largest size so that fits inside the given width and height
 image.background( hex );       // set the default new pixel colour (e.g. 0xFFFFFFFF or 0x00000000) for by some operations (e.g. image.contain and image.rotate) and when writing formats that don't support alpha channels
 image.mirror( horz, vert );    // an alias for flip
 image.fade( f );               // an alternative to opacity, fades the image by a factor 0 - 1. 0 will haven no effect. 1 will turn the image
