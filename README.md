@@ -4,6 +4,8 @@ The "JavaScript Image Manipulation Program" :-)
 
 An image processing library for Node written entirely in JavaScript, with zero external or native dependencies.
 
+Installation: `npm install --save jimp`
+
 Example usage:
 
 ```js
@@ -63,38 +65,65 @@ Jimp.read("http://www.example.com/path/to/lenna.jpg", function (err, image) {
 });
 ```
 
-JPEG images with EXIF orientation data will be automatically re-orientated as appropriate.
+
+### Basic methods ###
 
 Once the callback is filed or the promise fulfilled, the following methods can be called on the image:
 
 ```js
-image.crop( x, y, w, h );      // crop to the given region
-image.autocrop();              // automatically crop same-color borders from image (if any)
-image.invert();                // invert the image colours
-image.flip( horz, vert );      // flip the image horizontally or vertically
-image.gaussian( r );           // Gaussian blur the image by r pixels (VERY slow)
-image.blur( r );               // fast blur the image by r pixels
-image.greyscale();             // remove colour from the image
-image.sepia();                 // apply a sepia wash to the image
-image.opacity( f );            // multiply the alpha channel by each pixel by the factor f, 0 - 1
-image.resize( w, h[, mode] );  // resize the image. Jimp.AUTO can be passed as one of the values. Optionally, a resize mode can be passed.
-image.scale( f[, mode] );      // scale the image by the factor f
-image.rotate( deg[, resize] ); // rotate the image clockwise by a number of degrees. Unless `false` is passed as the second parameter, the image width and height will be resized appropriately.
+/* Resize */
+image.contain( w, h[, mode] );    // scale the image to the given width and height, some parts of the image may be letter boxed
+image.cover( w, h[, mode] );      // scale the image to the given width and height, some parts of the image may be clipped
+image.resize( w, h[, mode] );     // resize the image. Jimp.AUTO can be passed as one of the values.
+image.scale( f[, mode] );         // scale the image by the factor f
+image.scaleToFit( w, h[, mode] ); // scale the image to the largest size that fits inside the given width and height
+
+// An optional resize mode can be passed with all resize methods.
+
+/* Crop */
+image.autocrop();                 // automatically crop same-color borders from image (if any)
+image.crop( x, y, w, h );         // crop to the given region
+
+/* Composing */
 image.blit( src, x, y[, srcx, srcy, srcw, srch] );
-                               // blit the image with another Jimp image at x, y, optionally cropped.
-image.composite( src, x, y );  // composites another Jimp image over this iamge at x, y
-image.brightness( val );       // adjust the brighness by a value -1 to +1
-image.contrast( val );         // adjust the contrast by a value -1 to +1
-image.posterize( n );          // apply a posterization effect with n level
-image.mask( src, x, y );       // masks the image with another Jimp image at x, y using average pixel value
-image.dither565();             // ordered dithering of the image and reduce color space to 16-bits (RGB565)
-image.cover( w, h[, mode] );   // scale the image so that it fills the given width and height
-image.contain( w, h[, mode] ); // scale the image to the largest size so that fits inside the given width and height
-image.background( hex );       // set the default new pixel colour (e.g. 0xFFFFFFFF or 0x00000000) for by some operations (e.g. image.contain and image.rotate) and when writing formats that don't support alpha channels
-image.mirror( horz, vert );    // an alias for flip
-image.fade( f );               // an alternative to opacity, fades the image by a factor 0 - 1. 0 will haven no effect. 1 will turn the image
-image.opaque();                // set the alpha channel on every pixel to fully opaque
-image.clone();                 // returns a clone of the image
+                                  // blit the image with another Jimp image at x, y, optionally cropped.
+image.composite( src, x, y );     // composites another Jimp image over this iamge at x, y
+image.mask( src, x, y );          // masks the image with another Jimp image at x, y using average pixel value image.rotate) and when writing formats that don't support alpha channels
+
+/* Flip and rotate */
+image.flip( horz, vert );         // flip the image horizontally or vertically
+image.mirror( horz, vert );       // an alias for flip
+image.rotate( deg[, mode] );      // rotate the image clockwise by a number of degrees. Optionally, a resize mode can be passed. If `false` is passed as the second parameter, the image width and height will not be resized.
+
+// JPEG images with EXIF orientation data will be automatically re-orientated as appropriate.
+
+/* Colour */
+image.brightness( val );          // adjust the brighness by a value -1 to +1
+image.contrast( val );            // adjust the contrast by a value -1 to +1
+image.dither565();                // ordered dithering of the image and reduce color space to 16-bits (RGB565)
+image.greyscale();                // remove colour from the image
+image.invert();                   // invert the image colours
+image.normalize();                // normalize the channels in an image
+
+/* Alpha channel */
+image.fade( f );                  // an alternative to opacity, fades the image by a factor 0 - 1. 0 will haven no effect. 1 will turn the image
+image.opacity( f );               // multiply the alpha channel by each pixel by the factor f, 0 - 1
+image.opaque();                   // set the alpha channel on every pixel to fully opaque
+image.background( hex );          // set the default new pixel colour (e.g. 0xFFFFFFFF or 0x00000000) for by some operations (e.g. image.contain and 
+
+/* Blurs */
+image.gaussian( r );              // Gaussian blur the image by r pixels (VERY slow)
+image.blur( r );                  // fast blur the image by r pixels
+
+/* Effects */
+image.posterize( n );             // apply a posterization effect with n level
+image.sepia();                    // apply a sepia wash to the image
+```
+
+Some of these methods are irreversable, so it can be useful to perform them on a clone of the original image:
+
+```js
+image.clone();                    // returns a clone of the image
 ```
 
 (Contributions of more methods are welcome!)
@@ -104,9 +133,9 @@ image.clone();                 // returns a clone of the image
 The default rezing algorithm uses a bilinear method as follows:
 
 ```js
-image.resize(250, 250);       // resize the image to 250 x 250
-image.resize(Jimp.AUTO, 250); // resize the height to 250 and scale the width accordingly
-image.resize(250, Jimp.AUTO); // resize the width to 250 and scale the height accordingly
+image.resize(250, 250);           // resize the image to 250 x 250
+image.resize(Jimp.AUTO, 250);     // resize the height to 250 and scale the width accordingly
+image.resize(250, Jimp.AUTO);     // resize the width to 250 and scale the height accordingly
 ```
 
 Optionally, the following constants can be passed to choose a particular resizing algorithm:
@@ -124,6 +153,44 @@ For example:
 ```js
 image.resize(250, 250, Jimp.RESIZE_BEZIER);
 ```
+
+### Writing text ###
+
+Jimp supports basic typography using BMFont format (.fnt) [bitmap fonts](https://en.wikipedia.org/wiki/Bitmap_fonts):
+
+```js
+Jimp.loadFont( path ).then(function (font) { // load font from .fnt file
+    image.print(font, x, y, str); // print a message on an image
+});
+
+Jimp.loadFont( path, cb ); // using a callback pattern
+```
+
+BMFont fonts are raster based and fixed in size and colour. Jimp comes with a set of fonts that can be used on images:
+
+```js
+Jimp.FONT_SANS_8_BLACK;   // Open Sans, 8px, black
+Jimp.FONT_SANS_16_BLACK;  // Open Sans, 16px, black
+Jimp.FONT_SANS_32_BLACK;  // Open Sans, 32px, black
+Jimp.FONT_SANS_64_BLACK;  // Open Sans, 64px, black
+Jimp.FONT_SANS_128_BLACK; // Open Sans, 128px, black
+
+Jimp.FONT_SANS_8_WHITE;   // Open Sans, 8px, white
+Jimp.FONT_SANS_16_WHITE;  // Open Sans, 16px, white
+Jimp.FONT_SANS_32_WHITE;  // Open Sans, 32px, white
+Jimp.FONT_SANS_64_WHITE;  // Open Sans, 64px, white
+Jimp.FONT_SANS_128_WHITE; // Open Sans, 128px, white
+```
+
+These can be used as follows:
+
+```js
+Jimp.loadFont(Jimp.FONT_SANS_32_BLACK).then(function (font) {
+    image.print(font, 10, 10, "Hello world!");
+});
+```
+
+Online tools are also available to convert TTF fonts to BMFont format (e.g. [Littera](http://kvazars.com/littera/)).
 
 ## Writing to files and buffers ##
 
@@ -217,7 +284,7 @@ Modifier                | Description
 Jimp enables low-level manipulation of images in memory through the bitmap property of each Jimp object:
 
 ```js
-image.bitmap.data; // a Buffer of the raw bitmap data
+image.bitmap.data;  // a Buffer of the raw bitmap data
 image.bitmap.width; // the width of the image
 image.bitmap.height // the height of the image
 ```
@@ -251,7 +318,7 @@ image.scan(0, 0, image.bitmap.width, image.bitmap.height, function (x, y, idx) {
 Alternatively, you can manipulate individual pixels using the following these functions:
 
 ```js
-image.getPixelColor(x, y); // returns the colour of that pixel e.g. 0xFFFFFFFF
+image.getPixelColor(x, y);      // returns the colour of that pixel e.g. 0xFFFFFFFF
 image.setPixelColor(hex, x, y); // sets the colour of that pixel
 ```
 
@@ -259,7 +326,7 @@ Two static helper functions exist to convert RGBA values into single integer (he
 
 ```js
 Jimp.rgbaToInt(r, g, b, a); // e.g. converts 255, 255, 255, 255 to 0xFFFFFFFF
-Jimp.intToRGBA(hex); // e.g. converts 0xFFFFFFFF to {r: 255, g: 255, b: 255, a:255}
+Jimp.intToRGBA(hex);        // e.g. converts 0xFFFFFFFF to {r: 255, g: 255, b: 255, a:255}
 ```
 
 ### Creating new images ###
@@ -349,4 +416,4 @@ The Node-style callback pattern allows Jimp to be used with frameworks that expe
 
 ## License ##
 
-Jimp is licensed under the MIT license.
+Jimp is licensed under the MIT license. Open Sans is licensed under the Apache license.
